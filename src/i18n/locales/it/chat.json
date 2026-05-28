@@ -185,10 +185,10 @@
       "google": "di Google"
     },
     "readyPrompt": {
-      "claude": "Pronto a usare Claude con {{model}}. Inizia a digitare il tuo messaggio qui sotto.",
-      "cursor": "Pronto a usare Cursor con {{model}}. Inizia a digitare il tuo messaggio qui sotto.",
-      "codex": "Pronto a usare Codex con {{model}}. Inizia a digitare il tuo messaggio qui sotto.",
-      "gemini": "Pronto a usare Gemini con {{model}}. Inizia a digitare il tuo messaggio qui sotto.",
+      "claude": "Pronto a usare Claude. Inizia a digitare il tuo messaggio qui sotto.",
+      "cursor": "Pronto a usare Cursor. Inizia a digitare il tuo messaggio qui sotto.",
+      "codex": "Pronto a usare Codex. Inizia a digitare il tuo messaggio qui sotto.",
+      "gemini": "Pronto a usare Gemini. Inizia a digitare il tuo messaggio qui sotto.",
       "default": "Seleziona un provider sopra per iniziare"
     },
     "pressToSearch": "Premi <kbd>{{shortcut}}</kbd> per cercare sessioni, file e commit"

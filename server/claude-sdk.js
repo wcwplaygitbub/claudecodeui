@@ -28,6 +28,7 @@ import {
 import { sessionsService } from './modules/providers/services/sessions.service.js';
 import { providerAuthService } from './modules/providers/services/provider-auth.service.js';
 import { createNormalizedMessage } from './shared/utils.js';
+import { appendAttachmentPathsToPrompt } from './utils/chat-attachments.js';
 
 const activeSessions = new Map();
 const pendingToolApprovals = new Map();
@@ -502,7 +503,7 @@ async function queryClaudeSDK(command, options = {}, ws) {
 
     // Handle images - save to temp files and modify prompt
     const imageResult = await handleImages(command, options.images, options.cwd);
-    const finalCommand = imageResult.modifiedCommand;
+    const finalCommand = appendAttachmentPathsToPrompt(imageResult.modifiedCommand, options.attachments);
     tempImagePaths = imageResult.tempImagePaths;
     tempDir = imageResult.tempDir;
 

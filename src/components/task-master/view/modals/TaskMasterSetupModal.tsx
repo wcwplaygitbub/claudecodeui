@@ -58,7 +58,7 @@ export default function TaskMasterSetupModal({ isOpen, project, onClose, onAfter
             <Shell
               selectedProject={project}
               selectedSession={null}
-              initialCommand="npx task-master init"
+              initialCommand="npx task-master-ai init"
               isPlainShell
               isActive
               onProcessComplete={(exitCode) => {

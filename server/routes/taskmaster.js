@@ -35,78 +35,16 @@ async function resolveProjectPathFromId(projectId) {
 const router = express.Router();
 
 /**
- * Check if TaskMaster CLI is installed globally
- * @returns {Promise<Object>} Installation status result
+ * TaskMaster is invoked through npx task-master-ai by the server routes.
+ * Treat it as bundled by the app instead of requiring a global CLI install.
  */
 async function checkTaskMasterInstallation() {
-    return new Promise((resolve) => {
-        // Check if task-master command is available
-        const child = spawn('which', ['task-master'], { 
-            stdio: ['ignore', 'pipe', 'pipe'],
-            shell: true 
-        });
-        
-        let output = '';
-        let errorOutput = '';
-        
-        child.stdout.on('data', (data) => {
-            output += data.toString();
-        });
-        
-        child.stderr.on('data', (data) => {
-            errorOutput += data.toString();
-        });
-        
-        child.on('close', (code) => {
-            if (code === 0 && output.trim()) {
-                // TaskMaster is installed, get version
-                const versionChild = spawn('task-master', ['--version'], { 
-                    stdio: ['ignore', 'pipe', 'pipe'],
-                    shell: true 
-                });
-                
-                let versionOutput = '';
-                
-                versionChild.stdout.on('data', (data) => {
-                    versionOutput += data.toString();
-                });
-                
-                versionChild.on('close', (versionCode) => {
-                    resolve({
-                        isInstalled: true,
-                        installPath: output.trim(),
-                        version: versionCode === 0 ? versionOutput.trim() : 'unknown',
-                        reason: null
-                    });
-                });
-                
-                versionChild.on('error', () => {
-                    resolve({
-                        isInstalled: true,
-                        installPath: output.trim(),
-                        version: 'unknown',
-                        reason: null
-                    });
-                });
-            } else {
-                resolve({
-                    isInstalled: false,
-                    installPath: null,
-                    version: null,
-                    reason: 'TaskMaster CLI not found in PATH'
-                });
-            }
-        });
-        
-        child.on('error', (error) => {
-            resolve({
-                isInstalled: false,
-                installPath: null,
-                version: null,
-                reason: `Error checking installation: ${error.message}`
-            });
-        });
-    });
+    return {
+        isInstalled: true,
+        installPath: 'npx task-master-ai',
+        version: 'bundled',
+        reason: null
+    };
 }
 
 // API Routes
@@ -126,7 +64,7 @@ router.get('/installation-status', async (req, res) => {
             success: true,
             installation: installationStatus,
             mcpServer: mcpStatus,
-            isReady: installationStatus.isInstalled && mcpStatus.hasMCPServer
+            isReady: installationStatus.isInstalled
         });
     } catch (error) {
         console.error('Error checking TaskMaster installation:', error);
@@ -509,8 +447,8 @@ router.post('/init/:projectId', async (req, res) => {
             // Directory doesn't exist, we can proceed
         }
 
-        // Run taskmaster init command
-        const initProcess = spawn('npx', ['task-master', 'init'], {
+        // Run TaskMaster init through the bundled npx package.
+        const initProcess = spawn('npx', ['task-master-ai', 'init'], {
             cwd: projectPath,
             stdio: ['pipe', 'pipe', 'pipe']
         });

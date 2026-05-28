@@ -8,6 +8,8 @@ import {
   ListChecks,
   Palette,
   Plug,
+  Server,
+  Sparkles,
 } from 'lucide-react';
 
 import type {
@@ -28,6 +30,8 @@ export type SettingsMainTabMeta = {
 
 export const SETTINGS_MAIN_TABS: SettingsMainTabMeta[] = [
   { id: 'agents', label: 'Agents', keywords: 'agents subagents claude code', icon: Bot },
+  { id: 'mcp', label: 'MCP Servers', keywords: 'mcp servers tools context protocol', icon: Server },
+  { id: 'skills', label: 'Skills', keywords: 'skills agents slash commands', icon: Sparkles },
   { id: 'appearance', label: 'Appearance', keywords: 'appearance theme dark light language', icon: Palette },
   { id: 'git', label: 'Git', keywords: 'git github commits', icon: GitBranch },
   { id: 'api', label: 'API Tokens', keywords: 'api tokens auth keys', icon: KeyRound },
@@ -37,8 +41,8 @@ export const SETTINGS_MAIN_TABS: SettingsMainTabMeta[] = [
   { id: 'about', label: 'About', keywords: 'about version info', icon: Info },
 ];
 
-export const AGENT_PROVIDERS: AgentProvider[] = ['claude', 'cursor', 'codex', 'gemini'];
-export const AGENT_CATEGORIES: AgentCategory[] = ['account', 'permissions', 'mcp'];
+export const AGENT_PROVIDERS: AgentProvider[] = ['claude', 'codex'];
+export const AGENT_CATEGORIES: AgentCategory[] = ['account', 'permissions'];
 
 export const DEFAULT_PROJECT_SORT_ORDER: ProjectSortOrder = 'name';
 export const DEFAULT_SAVE_STATUS = null;

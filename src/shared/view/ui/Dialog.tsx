@@ -171,7 +171,7 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
     if (!open) return null;
 
     return createPortal(
-      <div className="fixed inset-0 z-50">
+      <div className="fixed inset-0 z-[10000]">
         {/* Overlay */}
         <div
           className="fixed inset-0 animate-dialog-overlay-show bg-black/50 backdrop-blur-sm"

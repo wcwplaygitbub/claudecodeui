@@ -2,8 +2,12 @@ import { Database } from 'better-sqlite3';
 
 import {
   APP_CONFIG_TABLE_SCHEMA_SQL,
+  CONFIG_PROVIDERS_TABLE_SCHEMA_SQL,
+  CONFIG_SYNC_BACKUPS_TABLE_SCHEMA_SQL,
   LAST_SCANNED_AT_SQL,
   PROJECTS_TABLE_SCHEMA_SQL,
+  UNIFIED_SKILL_APP_SYNCS_TABLE_SCHEMA_SQL,
+  UNIFIED_SKILLS_TABLE_SCHEMA_SQL,
   PUSH_SUBSCRIPTIONS_TABLE_SCHEMA_SQL,
   SESSIONS_TABLE_SCHEMA_SQL,
   USER_NOTIFICATION_PREFERENCES_TABLE_SCHEMA_SQL,
@@ -447,6 +451,21 @@ export const runMigrations = (db: Database) => {
     }
 
     db.exec(LAST_SCANNED_AT_SQL);
+
+    db.exec(CONFIG_PROVIDERS_TABLE_SCHEMA_SQL);
+    db.exec('CREATE INDEX IF NOT EXISTS idx_config_providers_app_type ON config_providers(app_type)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_config_providers_current ON config_providers(app_type, is_current)');
+
+    db.exec(CONFIG_SYNC_BACKUPS_TABLE_SCHEMA_SQL);
+    db.exec('CREATE INDEX IF NOT EXISTS idx_config_sync_backups_app_type ON config_sync_backups(app_type)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_config_sync_backups_created_at ON config_sync_backups(created_at)');
+
+    db.exec(UNIFIED_SKILLS_TABLE_SCHEMA_SQL);
+    db.exec('CREATE INDEX IF NOT EXISTS idx_unified_skills_name ON unified_skills(name)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_unified_skills_directory ON unified_skills(directory)');
+    db.exec(UNIFIED_SKILL_APP_SYNCS_TABLE_SCHEMA_SQL);
+    db.exec('CREATE INDEX IF NOT EXISTS idx_unified_skill_app_syncs_app ON unified_skill_app_syncs(app)');
+
     console.log('Database migrations completed successfully');
   } catch (error: any) {
     console.error('Error running migrations:', error.message);

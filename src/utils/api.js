@@ -244,6 +244,56 @@ export const api = {
       }),
   },
 
+  configCenter: {
+    providers: {
+      list: (app) => authenticatedFetch(`/api/config-center/providers/${encodeURIComponent(app)}`),
+      current: (app) => authenticatedFetch(`/api/config-center/providers/${encodeURIComponent(app)}/current`),
+      create: (app, payload) => authenticatedFetch(`/api/config-center/providers/${encodeURIComponent(app)}`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+      update: (app, id, payload) => authenticatedFetch(`/api/config-center/providers/${encodeURIComponent(app)}/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      }),
+      delete: (app, id) => authenticatedFetch(`/api/config-center/providers/${encodeURIComponent(app)}/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      }),
+      duplicate: (app, id, payload) => authenticatedFetch(`/api/config-center/providers/${encodeURIComponent(app)}/${encodeURIComponent(id)}/duplicate`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+      apply: (app, id) => authenticatedFetch(`/api/config-center/providers/${encodeURIComponent(app)}/${encodeURIComponent(id)}/apply`, {
+        method: 'POST',
+      }),
+      importCurrent: (app, payload) => authenticatedFetch(`/api/config-center/providers/${encodeURIComponent(app)}/import-current`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+      fetchClaudeModels: (payload) => authenticatedFetch('/api/config-center/providers/claude/models', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+      speedTestClaudeEndpoints: (payload) => authenticatedFetch('/api/config-center/providers/claude/speed-test', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+      previewClaudeSettings: (payload) => authenticatedFetch('/api/config-center/providers/claude/preview-settings', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+      getCommonConfigSnippet: (app) => authenticatedFetch(`/api/config-center/providers/${encodeURIComponent(app)}/common-config-snippet`),
+      setCommonConfigSnippet: (app, snippet) => authenticatedFetch(`/api/config-center/providers/${encodeURIComponent(app)}/common-config-snippet`, {
+        method: 'PUT',
+        body: JSON.stringify({ snippet }),
+      }),
+      extractCommonConfigSnippet: (app, payload) => authenticatedFetch(`/api/config-center/providers/${encodeURIComponent(app)}/extract-common-config-snippet`, {
+        method: 'POST',
+        body: JSON.stringify(payload || {}),
+      }),
+    },
+  },
+
   // Generic GET method for any endpoint
   get: (endpoint) => authenticatedFetch(`/api${endpoint}`),
 

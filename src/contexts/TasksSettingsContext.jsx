@@ -5,10 +5,10 @@ const TasksSettingsContext = createContext({
   tasksEnabled: true,
   setTasksEnabled: () => {},
   toggleTasksEnabled: () => {},
-  isTaskMasterInstalled: null,
-  isTaskMasterReady: null,
+  isTaskMasterInstalled: true,
+  isTaskMasterReady: true,
   installationStatus: null,
-  isCheckingInstallation: true
+  isCheckingInstallation: false
 });
 
 export const useTasksSettings = () => {
@@ -26,10 +26,10 @@ export const TasksSettingsProvider = ({ children }) => {
     return saved !== null ? JSON.parse(saved) : true; // Default to true
   });
   
-  const [isTaskMasterInstalled, setIsTaskMasterInstalled] = useState(null);
-  const [isTaskMasterReady, setIsTaskMasterReady] = useState(null);
+  const [isTaskMasterInstalled, setIsTaskMasterInstalled] = useState(true);
+  const [isTaskMasterReady, setIsTaskMasterReady] = useState(true);
   const [installationStatus, setInstallationStatus] = useState(null);
-  const [isCheckingInstallation, setIsCheckingInstallation] = useState(true);
+  const [isCheckingInstallation, setIsCheckingInstallation] = useState(false);
 
   // Save to localStorage whenever tasksEnabled changes
   useEffect(() => {
@@ -47,21 +47,15 @@ export const TasksSettingsProvider = ({ children }) => {
           setIsTaskMasterInstalled(data.installation?.isInstalled || false);
           setIsTaskMasterReady(data.isReady || false);
           
-          // If TaskMaster is not installed and user hasn't explicitly enabled tasks,
-          // disable tasks automatically
-          const userEnabledTasks = localStorage.getItem('tasks-enabled');
-          if (!data.installation?.isInstalled && !userEnabledTasks) {
-            setTasksEnabled(false);
-          }
         } else {
           console.error('Failed to check TaskMaster installation status');
-          setIsTaskMasterInstalled(false);
-          setIsTaskMasterReady(false);
+          setIsTaskMasterInstalled(true);
+          setIsTaskMasterReady(true);
         }
       } catch (error) {
         console.error('Error checking TaskMaster installation:', error);
-        setIsTaskMasterInstalled(false);
-        setIsTaskMasterReady(false);
+        setIsTaskMasterInstalled(true);
+        setIsTaskMasterReady(true);
       } finally {
         setIsCheckingInstallation(false);
       }

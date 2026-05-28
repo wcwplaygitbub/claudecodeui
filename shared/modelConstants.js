@@ -102,6 +102,4 @@ export const GEMINI_MODELS = {
 export const PROVIDERS = [
   { id: "claude", name: "Anthropic", models: CLAUDE_MODELS },
   { id: "codex", name: "OpenAI", models: CODEX_MODELS },
-  { id: "gemini", name: "Google", models: GEMINI_MODELS },
-  { id: "cursor", name: "Cursor", models: CURSOR_MODELS },
 ];

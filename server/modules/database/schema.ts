@@ -111,6 +111,79 @@ CREATE TABLE IF NOT EXISTS app_config (
 );
 `;
 
+export const CONFIG_PROVIDERS_TABLE_SCHEMA_SQL = `
+CREATE TABLE IF NOT EXISTS config_providers (
+    id TEXT NOT NULL,
+    app_type TEXT NOT NULL,
+    name TEXT NOT NULL,
+    settings_config TEXT NOT NULL,
+    category TEXT,
+    website_url TEXT,
+    notes TEXT,
+    icon TEXT,
+    icon_color TEXT,
+    meta TEXT DEFAULT '{}',
+    is_current INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id, app_type)
+);
+`;
+
+export const CONFIG_SYNC_BACKUPS_TABLE_SCHEMA_SQL = `
+CREATE TABLE IF NOT EXISTS config_sync_backups (
+    id TEXT PRIMARY KEY,
+    app_type TEXT NOT NULL,
+    target_type TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    backup_path TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+`;
+
+export const UNIFIED_SKILLS_TABLE_SCHEMA_SQL = `
+CREATE TABLE IF NOT EXISTS unified_skills (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    directory TEXT NOT NULL,
+    source_path TEXT NOT NULL,
+    enabled_claude INTEGER NOT NULL DEFAULT 0,
+    enabled_codex INTEGER NOT NULL DEFAULT 0,
+    enabled_gemini INTEGER NOT NULL DEFAULT 0,
+    enabled_cursor INTEGER NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+`;
+
+export const UNIFIED_SKILL_APP_SYNCS_TABLE_SCHEMA_SQL = `
+CREATE TABLE IF NOT EXISTS unified_skill_app_syncs (
+    skill_id TEXT NOT NULL,
+    app TEXT NOT NULL,
+    target_path TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (skill_id, app),
+    FOREIGN KEY (skill_id) REFERENCES unified_skills(id) ON DELETE CASCADE
+);
+`;
+
+export const UNIFIED_MCP_SERVERS_TABLE_SCHEMA_SQL = `
+CREATE TABLE IF NOT EXISTS unified_mcp_servers (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    server_config TEXT NOT NULL,
+    description TEXT,
+    tags TEXT NOT NULL DEFAULT '[]',
+    enabled_claude INTEGER NOT NULL DEFAULT 0,
+    enabled_codex INTEGER NOT NULL DEFAULT 0,
+    enabled_gemini INTEGER NOT NULL DEFAULT 0,
+    enabled_cursor INTEGER NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+`;
+
 export const INIT_SCHEMA_SQL = `
 -- Initialize authentication database
 PRAGMA foreign_keys = ON;
@@ -150,4 +223,22 @@ CREATE INDEX IF NOT EXISTS idx_session_ids_lookup ON sessions(session_id);
 ${LAST_SCANNED_AT_SQL}
 
 ${APP_CONFIG_TABLE_SCHEMA_SQL}
+
+${CONFIG_PROVIDERS_TABLE_SCHEMA_SQL}
+CREATE INDEX IF NOT EXISTS idx_config_providers_app_type ON config_providers(app_type);
+CREATE INDEX IF NOT EXISTS idx_config_providers_current ON config_providers(app_type, is_current);
+
+${CONFIG_SYNC_BACKUPS_TABLE_SCHEMA_SQL}
+CREATE INDEX IF NOT EXISTS idx_config_sync_backups_app_type ON config_sync_backups(app_type);
+CREATE INDEX IF NOT EXISTS idx_config_sync_backups_created_at ON config_sync_backups(created_at);
+
+${UNIFIED_MCP_SERVERS_TABLE_SCHEMA_SQL}
+CREATE INDEX IF NOT EXISTS idx_unified_mcp_servers_name ON unified_mcp_servers(name);
+
+${UNIFIED_SKILLS_TABLE_SCHEMA_SQL}
+CREATE INDEX IF NOT EXISTS idx_unified_skills_name ON unified_skills(name);
+CREATE INDEX IF NOT EXISTS idx_unified_skills_directory ON unified_skills(directory);
+
+${UNIFIED_SKILL_APP_SYNCS_TABLE_SCHEMA_SQL}
+CREATE INDEX IF NOT EXISTS idx_unified_skill_app_syncs_app ON unified_skill_app_syncs(app);
 `;

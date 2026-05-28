@@ -6,6 +6,20 @@ import { spawn } from 'child_process';
 const PLUGINS_DIR = path.join(os.homedir(), '.claude-code-ui', 'plugins');
 const PLUGINS_CONFIG_PATH = path.join(os.homedir(), '.claude-code-ui', 'plugins.json');
 
+const DEFAULT_PLUGINS = [
+  {
+    name: 'project-stats',
+    repoName: 'cloudcli-plugin-starter',
+    url: 'https://github.com/cloudcli-ai/cloudcli-plugin-starter',
+  },
+  {
+    name: 'web-terminal',
+    repoName: 'cloudcli-plugin-terminal',
+    url: 'https://github.com/cloudcli-ai/cloudcli-plugin-terminal',
+  },
+];
+let defaultPluginsInstallPromise = null;
+
 const REQUIRED_MANIFEST_FIELDS = ['name', 'displayName', 'entry'];
 
 /** Strip embedded credentials from a repo URL before exposing it to the client. */
@@ -365,6 +379,32 @@ export function installPluginFromGit(url) {
       reject(new Error(`Failed to spawn git: ${err.message}`));
     });
   });
+}
+
+export async function ensureDefaultPluginsInstalled() {
+  if (!defaultPluginsInstallPromise) {
+    defaultPluginsInstallPromise = Promise.all(DEFAULT_PLUGINS.map(async (plugin) => {
+      const plugins = scanPlugins();
+      if (plugins.some((installed) => installed.name === plugin.name)) {
+        return;
+      }
+
+      const targetDir = path.join(getPluginsDir(), plugin.repoName);
+      if (fs.existsSync(targetDir)) {
+        return;
+      }
+
+      try {
+        await installPluginFromGit(plugin.url);
+      } catch (err) {
+        console.error(`[Plugins] Failed to install bundled plugin "${plugin.name}":`, err.message);
+      }
+    })).finally(() => {
+      defaultPluginsInstallPromise = null;
+    });
+  }
+
+  await defaultPluginsInstallPromise;
 }
 
 export function updatePluginFromGit(name) {

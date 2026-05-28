@@ -1,12 +1,17 @@
 export { initializeDatabase } from '@/modules/database/init-db.js';
+export { closeConnection, getDatabasePath } from '@/modules/database/connection.js';
 export { apiKeysDb } from '@/modules/database/repositories/api-keys.js';
 export { appConfigDb } from '@/modules/database/repositories/app-config.js';
 export { credentialsDb } from '@/modules/database/repositories/credentials.js';
+export { configProvidersDb, type ConfigProvider, type SaveConfigProviderInput } from '@/modules/database/repositories/config-providers.js';
+export { configSyncBackupsDb } from '@/modules/database/repositories/config-sync-backups.js';
 export { githubTokensDb } from '@/modules/database/repositories/github-tokens.js';
 export { notificationPreferencesDb } from '@/modules/database/repositories/notification-preferences.js';
 export { projectsDb } from '@/modules/database/repositories/projects.db.js';
 export { pushSubscriptionsDb } from '@/modules/database/repositories/push-subscriptions.js';
 export { scanStateDb } from '@/modules/database/repositories/scan-state.db.js';
 export { sessionsDb } from '@/modules/database/repositories/sessions.db.js';
+export { unifiedMcpServersDb, type UnifiedMcpServerRow } from '@/modules/database/repositories/unified-mcp-servers.js';
+export { unifiedSkillsDb, type UnifiedSkillRow, type UnifiedSkillSyncRow } from '@/modules/database/repositories/unified-skills.js';
 export { userDb } from '@/modules/database/repositories/users.js';
 export { vapidKeysDb } from '@/modules/database/repositories/vapid-keys.js';

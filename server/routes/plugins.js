@@ -13,6 +13,7 @@ import {
   installPluginFromGit,
   updatePluginFromGit,
   uninstallPlugin,
+  ensureDefaultPluginsInstalled,
 } from '../utils/plugin-loader.js';
 import {
   startPluginServer,
@@ -24,8 +25,9 @@ import {
 const router = express.Router();
 
 // GET / — List all installed plugins (includes server running status)
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
+    await ensureDefaultPluginsInstalled();
     const plugins = scanPlugins().map(p => ({
       ...p,
       serverRunning: p.server ? isPluginRunning(p.name) : false,

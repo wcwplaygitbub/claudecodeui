@@ -4,6 +4,7 @@
     "account": "Hesap",
     "permissions": "İzinler",
     "mcpServers": "MCP Sunucuları",
+    "providers": "Provider Yönetimi",
     "appearance": "Görünüm"
   },
   "account": {
@@ -89,6 +90,7 @@
   },
   "mainTabs": {
     "label": "Ayarlar",
+    "configCenter": "Yapılandırma Merkezi",
     "agents": "Ajanlar",
     "appearance": "Görünüm",
     "git": "Git",
@@ -96,7 +98,9 @@
     "tasks": "Görevler",
     "notifications": "Bildirimler",
     "plugins": "Eklentiler",
-    "about": "Hakkında"
+    "about": "Hakkında",
+    "mcpServers": "MCP Servers",
+    "skills": "Skills"
   },
   "notifications": {
     "title": "Bildirimler",

@@ -4,6 +4,7 @@
     "account": "Аккаунт",
     "permissions": "Разрешения",
     "mcpServers": "MCP серверы",
+    "providers": "Управление Provider",
     "appearance": "Внешний вид"
   },
   "account": {
@@ -89,13 +90,16 @@
   },
   "mainTabs": {
     "label": "Настройки",
+    "configCenter": "Центр конфигурации",
     "agents": "Агенты",
     "appearance": "Внешний вид",
     "git": "Git",
     "apiTokens": "API и токены",
     "tasks": "Задачи",
     "plugins": "Плагины",
-    "about": "О программе"
+    "about": "О программе",
+    "mcpServers": "MCP Servers",
+    "skills": "Skills"
   },
   "appearanceSettings": {
     "darkMode": {

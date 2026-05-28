@@ -13,10 +13,20 @@ import { useDropzone } from 'react-dropzone';
 
 import { authenticatedFetch } from '../../../utils/api';
 import { thinkingModes } from '../constants/thinkingModes';
+import {
+  CHAT_FILE_DROPZONE_ACCEPT,
+  MAX_CHAT_FILES,
+  MAX_CHAT_FILES_TOTAL_SIZE_BYTES,
+  MAX_CHAT_FILE_SIZE_BYTES,
+  formatFileSize,
+  isSupportedChatFile,
+} from '../utils/chatAttachments';
 import { grantClaudeToolPermission } from '../utils/chatPermissions';
 import { safeLocalStorage } from '../utils/chatStorage';
 import type {
+  ChatAttachment,
   ChatMessage,
+  PendingChatFileAttachment,
   PendingPermissionRequest,
   PermissionMode,
 } from '../types/types';
@@ -143,6 +153,8 @@ export function useChatComposerState({
   const [attachedImages, setAttachedImages] = useState<File[]>([]);
   const [uploadingImages, setUploadingImages] = useState<Map<string, number>>(new Map());
   const [imageErrors, setImageErrors] = useState<Map<string, string>>(new Map());
+  const [attachedFiles, setAttachedFiles] = useState<PendingChatFileAttachment[]>([]);
+  const [fileErrors, setFileErrors] = useState<Map<string, string>>(new Map());
   const [isTextareaExpanded, setIsTextareaExpanded] = useState(false);
   const [thinkingMode, setThinkingMode] = useState('none');
 
@@ -426,6 +438,47 @@ export function useChatComposerState({
     }
   }, []);
 
+  const createFileAttachmentId = (file: File) => `${file.name}-${file.size}-${file.lastModified}-${Math.random().toString(36).slice(2)}`;
+
+  const handleChatFiles = useCallback((files: File[]) => {
+    setFileErrors(new Map());
+
+    setAttachedFiles((previous) => {
+      const next = [...previous];
+      const errors = new Map<string, string>();
+      const currentTotalSize = next.reduce((total, attachment) => total + attachment.file.size, 0);
+      let nextTotalSize = currentTotalSize;
+
+      for (const file of files) {
+        if (!isSupportedChatFile(file)) {
+          errors.set(file.name, 'Unsupported file type');
+          continue;
+        }
+
+        if (file.size > MAX_CHAT_FILE_SIZE_BYTES) {
+          errors.set(file.name, `File too large (max ${formatFileSize(MAX_CHAT_FILE_SIZE_BYTES)})`);
+          continue;
+        }
+
+        if (next.length >= MAX_CHAT_FILES) {
+          errors.set(file.name, `Too many files (max ${MAX_CHAT_FILES})`);
+          continue;
+        }
+
+        if (nextTotalSize + file.size > MAX_CHAT_FILES_TOTAL_SIZE_BYTES) {
+          errors.set(file.name, `Total file size too large (max ${formatFileSize(MAX_CHAT_FILES_TOTAL_SIZE_BYTES)})`);
+          continue;
+        }
+
+        nextTotalSize += file.size;
+        next.push({ id: createFileAttachmentId(file), file });
+      }
+
+      setFileErrors(errors);
+      return next;
+    });
+  }, []);
+
   const handlePaste = useCallback(
     (event: ClipboardEvent<HTMLTextAreaElement>) => {
       const items = Array.from(event.clipboardData.items);
@@ -443,21 +496,45 @@ export function useChatComposerState({
       if (items.length === 0 && event.clipboardData.files.length > 0) {
         const files = Array.from(event.clipboardData.files);
         const imageFiles = files.filter((file) => file.type.startsWith('image/'));
+        const documentFiles = files.filter((file) => !file.type.startsWith('image/'));
         if (imageFiles.length > 0) {
           handleImageFiles(imageFiles);
         }
+        if (documentFiles.length > 0) {
+          handleChatFiles(documentFiles);
+        }
       }
     },
-    [handleImageFiles],
+    [handleChatFiles, handleImageFiles],
   );
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     accept: {
       'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'],
+      ...CHAT_FILE_DROPZONE_ACCEPT,
     },
-    maxSize: 5 * 1024 * 1024,
-    maxFiles: 5,
-    onDrop: handleImageFiles,
+    maxSize: MAX_CHAT_FILE_SIZE_BYTES,
+    maxFiles: 10,
+    onDrop: (files) => {
+      const imageFiles = files.filter((file) => file.type.startsWith('image/'));
+      const documentFiles = files.filter((file) => !file.type.startsWith('image/'));
+      if (imageFiles.length > 0) {
+        handleImageFiles(imageFiles);
+      }
+      if (documentFiles.length > 0) {
+        handleChatFiles(documentFiles);
+      }
+    },
+    onDropRejected: (rejections) => {
+      setFileErrors((previous) => {
+        const next = new Map(previous);
+        rejections.forEach((rejection) => {
+          const message = rejection.errors[0]?.message || 'File rejected';
+          next.set(rejection.file.name, message);
+        });
+        return next;
+      });
+    },
     noClick: true,
     noKeyboard: true,
   });
@@ -485,6 +562,8 @@ export function useChatComposerState({
           setAttachedImages([]);
           setUploadingImages(new Map());
           setImageErrors(new Map());
+          setAttachedFiles([]);
+          setFileErrors(new Map());
           resetCommandMenuState();
           setIsTextareaExpanded(false);
           if (textareaRef.current) {
@@ -532,6 +611,38 @@ export function useChatComposerState({
         }
       }
 
+      let uploadedAttachments: ChatAttachment[] = [];
+      if (attachedFiles.length > 0) {
+        const formData = new FormData();
+        attachedFiles.forEach((attachment) => {
+          formData.append('attachments', attachment.file);
+        });
+
+        try {
+          const response = await authenticatedFetch(`/api/projects/${selectedProject.projectId}/upload-attachments`, {
+            method: 'POST',
+            headers: {},
+            body: formData,
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.error || 'Failed to upload files');
+          }
+
+          const result = await response.json();
+          uploadedAttachments = result.attachments || [];
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Unknown error';
+          addMessage({
+            type: 'error',
+            content: `Failed to upload files: ${message}`,
+            timestamp: new Date(),
+          });
+          return;
+        }
+      }
+
       const effectiveSessionId =
         currentSessionId || selectedSession?.id || sessionStorage.getItem('cursorSessionId');
 
@@ -539,6 +650,7 @@ export function useChatComposerState({
         type: 'user',
         content: currentInput,
         images: uploadedImages as any,
+        attachments: uploadedAttachments,
         timestamp: new Date(),
       };
 
@@ -626,6 +738,7 @@ export function useChatComposerState({
             model: codexModel,
             sessionSummary,
             permissionMode: permissionMode === 'plan' ? 'default' : permissionMode,
+            attachments: uploadedAttachments,
           },
         });
       } else if (provider === 'gemini') {
@@ -658,6 +771,7 @@ export function useChatComposerState({
             model: claudeModel,
             sessionSummary,
             images: uploadedImages,
+            attachments: uploadedAttachments,
           },
         });
       }
@@ -668,6 +782,8 @@ export function useChatComposerState({
       setAttachedImages([]);
       setUploadingImages(new Map());
       setImageErrors(new Map());
+      setAttachedFiles([]);
+      setFileErrors(new Map());
       setIsTextareaExpanded(false);
       setThinkingMode('none');
 
@@ -679,6 +795,7 @@ export function useChatComposerState({
     },
     [
       selectedSession,
+      attachedFiles,
       attachedImages,
       claudeModel,
       codexModel,
@@ -963,10 +1080,22 @@ export function useChatComposerState({
     setAttachedImages,
     uploadingImages,
     imageErrors,
+    attachedFiles,
+    fileErrors,
+    setAttachedFiles,
+    onRemoveFile: (id: string) => {
+      setAttachedFiles((previous) => previous.filter((attachment) => attachment.id !== id));
+      setFileErrors((previous) => {
+        const next = new Map(previous);
+        next.delete(id);
+        return next;
+      });
+    },
     getRootProps,
     getInputProps,
     isDragActive,
     openImagePicker: open,
+    openAttachmentPicker: open,
     handleSubmit,
     handleInputChange,
     handleKeyDown,

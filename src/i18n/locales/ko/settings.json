@@ -4,6 +4,7 @@
     "account": "계정",
     "permissions": "권한",
     "mcpServers": "MCP 서버",
+    "providers": "Provider 관리",
     "appearance": "외관"
   },
   "account": {
@@ -89,6 +90,7 @@
   },
   "mainTabs": {
     "label": "설정",
+    "configCenter": "구성 센터",
     "agents": "에이전트",
     "appearance": "외관",
     "git": "Git",
@@ -96,7 +98,9 @@
     "tasks": "작업",
     "notifications": "알림",
     "plugins": "플러그인",
-    "about": "정보"
+    "about": "정보",
+    "mcpServers": "MCP Servers",
+    "skills": "Skills"
   },
   "notifications": {
     "title": "알림",

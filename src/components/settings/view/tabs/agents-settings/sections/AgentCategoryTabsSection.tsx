@@ -3,18 +3,22 @@ import { cn } from '../../../../../../lib/utils';
 import type { AgentCategory } from '../../../../types/types';
 import type { AgentCategoryTabsSectionProps } from '../types';
 
-const AGENT_CATEGORIES: AgentCategory[] = ['account', 'permissions', 'mcp'];
+const BASE_AGENT_CATEGORIES: AgentCategory[] = ['account', 'permissions'];
 
 export default function AgentCategoryTabsSection({
+  selectedAgent,
   selectedCategory,
   onSelectCategory,
 }: AgentCategoryTabsSectionProps) {
   const { t } = useTranslation('settings');
+  const categories: AgentCategory[] = selectedAgent === 'claude'
+    ? [...BASE_AGENT_CATEGORIES, 'providers']
+    : BASE_AGENT_CATEGORIES;
 
   return (
     <div className="flex-shrink-0 border-b border-border">
       <div role="tablist" className="flex overflow-x-auto px-2 md:px-4">
-        {AGENT_CATEGORIES.map((category) => (
+        {categories.map((category) => (
           <button
             key={category}
             role="tab"
@@ -29,7 +33,7 @@ export default function AgentCategoryTabsSection({
           >
             {category === 'account' && t('tabs.account')}
             {category === 'permissions' && t('tabs.permissions')}
-            {category === 'mcp' && t('tabs.mcpServers')}
+            {category === 'providers' && t('tabs.providers')}
           </button>
         ))}
       </div>

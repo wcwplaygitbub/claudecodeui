@@ -4,6 +4,7 @@
     "account": "Konto",
     "permissions": "Berechtigungen",
     "mcpServers": "MCP-Server",
+    "providers": "Provider-Verwaltung",
     "appearance": "Darstellung"
   },
   "account": {
@@ -89,13 +90,16 @@
   },
   "mainTabs": {
     "label": "Einstellungen",
+    "configCenter": "Konfigurationszentrum",
     "agents": "Agenten",
     "appearance": "Darstellung",
     "git": "Git",
     "apiTokens": "API & Token",
     "tasks": "Aufgaben",
     "plugins": "Plugins",
-    "about": "Info"
+    "about": "Info",
+    "mcpServers": "MCP Servers",
+    "skills": "Skills"
   },
   "appearanceSettings": {
     "darkMode": {

@@ -65,12 +65,16 @@ import userRoutes from './routes/user.js';
 import geminiRoutes from './routes/gemini.js';
 import pluginsRoutes from './routes/plugins.js';
 import providerRoutes from './modules/providers/provider.routes.js';
+import unifiedMcpRoutes from './modules/unified-mcp/unified-mcp.routes.js';
+import unifiedSkillsRoutes from './modules/unified-skills/unified-skills.routes.js';
+import configCenterRoutes from './modules/config-center/config-center.routes.js';
 import { startEnabledPluginServers, stopAllPlugins, getPluginPort } from './utils/plugin-process-manager.js';
 import { initializeDatabase, projectsDb } from './modules/database/index.js';
 import { configureWebPush } from './services/vapid-keys.js';
 import { validateApiKey, authenticateToken, authenticateWebSocket } from './middleware/auth.js';
 import { IS_PLATFORM } from './constants/config.js';
 import { c } from './utils/colors.js';
+import { resolveProjectPathFromRow } from './utils/chat-attachments.js';
 
 const __dirname = getModuleDir(import.meta.url);
 // The server source runs from /server, while the compiled output runs from /dist-server/server.
@@ -184,6 +188,15 @@ app.use('/api/plugins', authenticateToken, pluginsRoutes);
 
 // Unified provider MCP routes (protected)
 app.use('/api/providers', authenticateToken, providerRoutes);
+
+// Unified MCP registry routes (protected)
+app.use('/api/unified-mcp', authenticateToken, unifiedMcpRoutes);
+
+// Unified Skills registry routes (protected)
+app.use('/api/unified-skills', authenticateToken, unifiedSkillsRoutes);
+
+// Config Center routes (protected)
+app.use('/api/config-center', authenticateToken, configCenterRoutes);
 
 // Agent API Routes (uses API key authentication)
 app.use('/api/agent', agentRoutes);
@@ -1024,6 +1037,101 @@ const uploadFilesHandler = async (req, res) => {
 };
 
 app.post('/api/projects/:projectId/files/upload', authenticateToken, uploadFilesHandler);
+
+const CHAT_ATTACHMENT_ALLOWED_EXTENSIONS = new Set(['.pdf', '.docx', '.txt', '.md', '.csv', '.json', '.xlsx']);
+const CHAT_ATTACHMENT_MAX_FILES = 5;
+const CHAT_ATTACHMENT_MAX_FILE_SIZE = 20 * 1024 * 1024;
+const CHAT_ATTACHMENT_MAX_TOTAL_SIZE = 50 * 1024 * 1024;
+
+function sanitizeUploadFileName(fileName) {
+    return String(fileName || 'attachment').replace(/[^a-zA-Z0-9._-]/g, '_');
+}
+
+function isAllowedChatAttachment(file) {
+    const extension = path.extname(file.originalname || '').toLowerCase();
+    return CHAT_ATTACHMENT_ALLOWED_EXTENSIONS.has(extension);
+}
+
+app.post('/api/projects/:projectId/upload-attachments', authenticateToken, async (req, res) => {
+    try {
+        const multer = (await import('multer')).default;
+        const { projectId } = req.params;
+        const project = projectsDb.getProjectById(projectId);
+
+        if (!project) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+
+        const projectPath = resolveProjectPathFromRow(project);
+        if (!projectPath) {
+            return res.status(400).json({ error: 'Project path is not available' });
+        }
+
+        const uploadGroup = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
+        const uploadDir = path.join(projectPath, '.tmp', 'uploads', uploadGroup);
+
+        const storage = multer.diskStorage({
+            destination: async (_req, _file, cb) => {
+                try {
+                    await fsPromises.mkdir(uploadDir, { recursive: true });
+                    cb(null, uploadDir);
+                } catch (error) {
+                    cb(error);
+                }
+            },
+            filename: (_req, file, cb) => {
+                cb(null, sanitizeUploadFileName(file.originalname));
+            }
+        });
+
+        const upload = multer({
+            storage,
+            fileFilter: (_req, file, cb) => {
+                if (isAllowedChatAttachment(file)) {
+                    cb(null, true);
+                } else {
+                    cb(new Error('Invalid file type. Supported files: PDF, docx, txt, md, csv, json, xlsx.'));
+                }
+            },
+            limits: {
+                fileSize: CHAT_ATTACHMENT_MAX_FILE_SIZE,
+                files: CHAT_ATTACHMENT_MAX_FILES
+            }
+        });
+
+        upload.array('attachments', CHAT_ATTACHMENT_MAX_FILES)(req, res, async (err) => {
+            const files = Array.isArray(req.files) ? req.files : [];
+
+            if (err) {
+                await Promise.all(files.map((file) => fsPromises.unlink(file.path).catch(() => {})));
+                return res.status(400).json({ error: err.message });
+            }
+
+            if (files.length === 0) {
+                return res.status(400).json({ error: 'No attachment files provided' });
+            }
+
+            const totalSize = files.reduce((total, file) => total + file.size, 0);
+            if (totalSize > CHAT_ATTACHMENT_MAX_TOTAL_SIZE) {
+                await Promise.all(files.map((file) => fsPromises.unlink(file.path).catch(() => {})));
+                return res.status(400).json({ error: 'Total file size too large (max 50MB)' });
+            }
+
+            const attachments = files.map((file) => ({
+                id: `${Date.now()}-${Math.round(Math.random() * 1E9)}`,
+                name: file.originalname,
+                mimeType: file.mimetype,
+                size: file.size,
+                path: file.path
+            }));
+
+            res.json({ attachments });
+        });
+    } catch (error) {
+        console.error('Error in attachment upload endpoint:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 // Image upload endpoint. Accepts the DB-assigned `projectId` (not a folder name)
 // but the current implementation doesn't need to touch the project directory,

@@ -1,4 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { FileTextIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import SessionProviderLogo from '../../../llm-logo-provider/SessionProviderLogo';
 import type {
@@ -9,6 +10,7 @@ import type {
 } from '../../types/types';
 import { formatUsageLimitText } from '../../utils/chatFormatting';
 import { getClaudePermissionSuggestion } from '../../utils/chatPermissions';
+import { formatFileSize } from '../../utils/chatAttachments';
 import type { Project } from '../../../../types/app';
 import { ToolRenderer, shouldHideToolResult } from '../../tools';
 import { Reasoning, ReasoningTrigger, ReasoningContent } from '../../../../shared/view/ui';
@@ -133,6 +135,23 @@ const MessageComponent = memo(({ message, prevMessage, createDiff, onFileOpen, o
                     className="h-auto max-w-full cursor-pointer rounded-lg transition-opacity hover:opacity-90"
                     onClick={() => window.open(img.data, '_blank')}
                   />
+                ))}
+              </div>
+            )}
+            {message.attachments && message.attachments.length > 0 && (
+              <div className="mt-2 flex flex-col gap-1.5">
+                {message.attachments.map((attachment) => (
+                  <button
+                    key={attachment.id || attachment.path}
+                    type="button"
+                    onClick={() => navigator.clipboard?.writeText(attachment.path)}
+                    className="flex items-center gap-2 rounded-lg bg-blue-500/70 px-2.5 py-2 text-left text-white transition-colors hover:bg-blue-500"
+                    title={attachment.path}
+                  >
+                    <FileTextIcon className="h-4 w-4 flex-shrink-0" />
+                    <span className="min-w-0 flex-1 truncate text-xs font-medium">{attachment.name}</span>
+                    <span className="flex-shrink-0 text-[11px] text-blue-100">{formatFileSize(attachment.size)}</span>
+                  </button>
                 ))}
               </div>
             )}

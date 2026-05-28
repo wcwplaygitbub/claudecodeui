@@ -4,6 +4,7 @@
     "account": "Account",
     "permissions": "Permessi",
     "mcpServers": "Server MCP",
+    "providers": "Gestione Provider",
     "appearance": "Aspetto"
   },
   "account": {
@@ -89,6 +90,7 @@
   },
   "mainTabs": {
     "label": "Impostazioni",
+    "configCenter": "Centro configurazione",
     "agents": "Agenti",
     "appearance": "Aspetto",
     "git": "Git",
@@ -96,7 +98,9 @@
     "tasks": "Attività",
     "notifications": "Notifiche",
     "plugins": "Plugin",
-    "about": "Informazioni"
+    "about": "Informazioni",
+    "mcpServers": "MCP Servers",
+    "skills": "Skills"
   },
   "notifications": {
     "title": "Notifiche",

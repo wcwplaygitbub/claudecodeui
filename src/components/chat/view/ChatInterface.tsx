@@ -65,13 +65,9 @@ function ChatInterface({
     provider,
     setProvider,
     cursorModel,
-    setCursorModel,
     claudeModel,
-    setClaudeModel,
     codexModel,
-    setCodexModel,
     geminiModel,
-    setGeminiModel,
     permissionMode,
     pendingPermissionRequests,
     setPendingPermissionRequests,
@@ -154,10 +150,14 @@ function ChatInterface({
     setAttachedImages,
     uploadingImages,
     imageErrors,
+    attachedFiles,
+    fileErrors,
+    onRemoveFile,
     getRootProps,
     getInputProps,
     isDragActive,
     openImagePicker,
+    openAttachmentPicker,
     handleSubmit,
     handleInputChange,
     handleKeyDown,
@@ -310,14 +310,6 @@ function ChatInterface({
           provider={provider}
           setProvider={(nextProvider) => setProvider(nextProvider as Provider)}
           textareaRef={textareaRef}
-          claudeModel={claudeModel}
-          setClaudeModel={setClaudeModel}
-          cursorModel={cursorModel}
-          setCursorModel={setCursorModel}
-          codexModel={codexModel}
-          setCodexModel={setCodexModel}
-          geminiModel={geminiModel}
-          setGeminiModel={setGeminiModel}
           tasksEnabled={tasksEnabled}
           isTaskMasterInstalled={isTaskMasterInstalled}
           onShowAllTasks={onShowAllTasks}
@@ -374,6 +366,10 @@ function ChatInterface({
           }
           uploadingImages={uploadingImages}
           imageErrors={imageErrors}
+          attachedFiles={attachedFiles}
+          onRemoveFile={onRemoveFile}
+          fileErrors={fileErrors}
+          openAttachmentPicker={openAttachmentPicker}
           showFileDropdown={showFileDropdown}
           filteredFiles={filteredFiles}
           selectedFileIndex={selectedFileIndex}

@@ -22,7 +22,8 @@ export function useChatProviderState({ selectedSession }: UseChatProviderStateAr
   const [permissionMode, setPermissionMode] = useState<PermissionMode>('default');
   const [pendingPermissionRequests, setPendingPermissionRequests] = useState<PendingPermissionRequest[]>([]);
   const [provider, setProvider] = useState<LLMProvider>(() => {
-    return (localStorage.getItem('selected-provider') as LLMProvider) || 'claude';
+    const savedProvider = localStorage.getItem('selected-provider') as LLMProvider | null;
+    return savedProvider === 'codex' ? 'codex' : 'claude';
   });
   const [cursorModel, setCursorModel] = useState<string>(() => {
     return localStorage.getItem('cursor-model') || CURSOR_MODELS.DEFAULT;
@@ -50,12 +51,17 @@ export function useChatProviderState({ selectedSession }: UseChatProviderStateAr
   }, [selectedSession?.id, provider]);
 
   useEffect(() => {
-    if (!selectedSession?.__provider || selectedSession.__provider === provider) {
+    if (!selectedSession?.__provider) {
       return;
     }
 
-    setProvider(selectedSession.__provider);
-    localStorage.setItem('selected-provider', selectedSession.__provider);
+    const nextProvider = selectedSession.__provider === 'codex' ? 'codex' : 'claude';
+    if (nextProvider === provider) {
+      return;
+    }
+
+    setProvider(nextProvider);
+    localStorage.setItem('selected-provider', nextProvider);
   }, [provider, selectedSession]);
 
   useEffect(() => {

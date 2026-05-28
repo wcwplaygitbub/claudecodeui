@@ -75,6 +75,37 @@ export type GlobalMcpServerResult = {
   error?: string;
 };
 
+export type UnifiedMcpApp = 'claude' | 'codex' | 'gemini' | 'cursor';
+
+export type UnifiedMcpAppStates = Record<UnifiedMcpApp, boolean>;
+
+export type UnifiedMcpServer = {
+  id: string;
+  name: string;
+  description: string | null;
+  tags: string[];
+  serverConfig: {
+    transport: McpTransport;
+    command?: string;
+    args?: string[];
+    env?: KeyValueMap;
+    cwd?: string;
+    url?: string;
+    headers?: KeyValueMap;
+    envVars?: string[];
+    bearerTokenEnvVar?: string;
+    envHttpHeaders?: KeyValueMap;
+  };
+  enabled: UnifiedMcpAppStates;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type UnifiedMcpServerFormValue = ProviderMcpServer & {
+  id: string;
+  enabled: UnifiedMcpAppStates;
+};
+
 export type ApiSuccessResponse<T> = {
   success: true;
   data: T;

@@ -185,11 +185,11 @@
       "google": "by Google"
     },
     "readyPrompt": {
-      "claude": "Ready to use Claude with {{model}}. Start typing your message below.",
-      "cursor": "Ready to use Cursor with {{model}}. Start typing your message below.",
-      "codex": "Ready to use Codex with {{model}}. Start typing your message below.",
-      "gemini": "Ready to use Gemini with {{model}}. Start typing your message below.",
-      "default": "Select a provider above to begin"
+      "claude": "Ready to use Claude. Start typing your message below.",
+      "cursor": "Ready to use Cursor. Start typing your message below.",
+      "codex": "Ready to use Codex. Start typing your message below.",
+      "gemini": "Ready to use Gemini. Start typing your message below.",
+      "default": "Select an AI assistant above to begin"
     },
     "pressToSearch": "Press <kbd>{{shortcut}}</kbd> to search sessions, files, and commits"
   },

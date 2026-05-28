@@ -4,6 +4,7 @@
     "account": "アカウント",
     "permissions": "権限",
     "mcpServers": "MCPサーバー",
+    "providers": "Provider管理",
     "appearance": "外観"
   },
   "account": {
@@ -89,6 +90,7 @@
   },
   "mainTabs": {
     "label": "設定",
+    "configCenter": "設定センター",
     "agents": "エージェント",
     "appearance": "外観",
     "git": "Git",
@@ -96,7 +98,9 @@
     "tasks": "タスク",
     "notifications": "通知",
     "plugins": "プラグイン",
-    "about": "概要"
+    "about": "概要",
+    "mcpServers": "MCP Servers",
+    "skills": "Skills"
   },
   "notifications": {
     "title": "通知",

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { useServerPlatform } from '../../../../../hooks/useServerPlatform';
+import { AGENT_PROVIDERS } from '../../../constants/constants';
 import type { AgentCategory, AgentProvider } from '../../../types/types';
 
 import type { AgentContext, AgentsSettingsTabProps } from './types';
@@ -13,56 +13,34 @@ export default function AgentsSettingsTab({
   onProviderLogin,
   claudePermissions,
   onClaudePermissionsChange,
-  cursorPermissions,
-  onCursorPermissionsChange,
   codexPermissionMode,
   onCodexPermissionModeChange,
-  geminiPermissionMode,
-  onGeminiPermissionModeChange,
   projects,
 }: AgentsSettingsTabProps) {
   const [selectedAgent, setSelectedAgent] = useState<AgentProvider>('claude');
   const [selectedCategory, setSelectedCategory] = useState<AgentCategory>('account');
-  const { isWindowsServer } = useServerPlatform();
 
-  const visibleAgents = useMemo<AgentProvider[]>(() => {
-    const all: AgentProvider[] = ['claude', 'cursor', 'codex', 'gemini'];
-    if (isWindowsServer) {
-      return all.filter((id) => id !== 'cursor');
-    }
-
-    return all;
-  }, [isWindowsServer]);
+  const visibleAgents = useMemo<AgentProvider[]>(() => AGENT_PROVIDERS, []);
 
   useEffect(() => {
-    if (isWindowsServer && selectedAgent === 'cursor') {
-      setSelectedAgent('claude');
+    if (selectedAgent !== 'claude' && selectedCategory === 'providers') {
+      setSelectedCategory('account');
     }
-  }, [isWindowsServer, selectedAgent]);
+  }, [selectedAgent, selectedCategory]);
 
   const agentContextById = useMemo<Record<AgentProvider, AgentContext>>(() => ({
     claude: {
       authStatus: providerAuthStatus.claude,
       onLogin: () => onProviderLogin('claude'),
     },
-    cursor: {
-      authStatus: providerAuthStatus.cursor,
-      onLogin: () => onProviderLogin('cursor'),
-    },
     codex: {
       authStatus: providerAuthStatus.codex,
       onLogin: () => onProviderLogin('codex'),
-    },
-    gemini: {
-      authStatus: providerAuthStatus.gemini,
-      onLogin: () => onProviderLogin('gemini'),
     },
   }), [
     onProviderLogin,
     providerAuthStatus.claude,
     providerAuthStatus.codex,
-    providerAuthStatus.cursor,
-    providerAuthStatus.gemini,
   ]);
 
   return (
@@ -76,6 +54,7 @@ export default function AgentsSettingsTab({
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <AgentCategoryTabsSection
+          selectedAgent={selectedAgent}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
         />
@@ -86,12 +65,8 @@ export default function AgentsSettingsTab({
           agentContextById={agentContextById}
           claudePermissions={claudePermissions}
           onClaudePermissionsChange={onClaudePermissionsChange}
-          cursorPermissions={cursorPermissions}
-          onCursorPermissionsChange={onCursorPermissionsChange}
           codexPermissionMode={codexPermissionMode}
           onCodexPermissionModeChange={onCodexPermissionModeChange}
-          geminiPermissionMode={geminiPermissionMode}
-          onGeminiPermissionModeChange={onGeminiPermissionModeChange}
           projects={projects}
         />
       </div>
