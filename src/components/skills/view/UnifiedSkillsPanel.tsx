@@ -1,29 +1,37 @@
-import { Download, Search, Sparkles, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Download, Search, Sparkles, Trash2, Upload } from 'lucide-react';
 
 import { Badge, Button } from '../../../shared/view/ui';
 import { cn } from '../../../lib/utils';
 import { useUnifiedSkills } from '../hooks/useUnifiedSkills';
 import type { UnifiedSkillApp } from '../types';
+import ManualSkillImportDialog from './ManualSkillImportDialog';
 
 const UNIFIED_SKILL_APPS: Array<{ id: UnifiedSkillApp; label: string }> = [
   { id: 'claude', label: 'Claude' },
   { id: 'codex', label: 'Codex' },
-  { id: 'gemini', label: 'Gemini' },
-  { id: 'cursor', label: 'Cursor' },
 ];
 
 export default function UnifiedSkillsPanel() {
+  const [manualImportOpen, setManualImportOpen] = useState(false);
   const {
     skills,
     unmanagedSkills,
     isLoading,
     isScanning,
+    isPreviewingZip,
+    isImportingZip,
+    zipPreview,
+    zipImportError,
     loadError,
     saveStatus,
     scanUnmanaged,
     importSkill,
     toggleApp,
     deleteSkill,
+    previewZipSkill,
+    importZipSkill,
+    clearZipPreview,
   } = useUnifiedSkills();
 
   return (
@@ -33,13 +41,17 @@ export default function UnifiedSkillsPanel() {
         <h3 className="text-lg font-medium text-foreground">Skills 管理</h3>
       </div>
       <p className="text-sm text-muted-foreground">
-        统一管理 Claude、Codex、Gemini、Cursor 的 Skills。扫描范围：~/.claude/skills、~/.agents/skills、~/.gemini/skills、~/.cursor/skills。同步策略是 merge-only：目标应用已有同名 skill 时不会覆盖，关闭时只删除本工具创建的同步副本。
+        统一管理 Claude、Codex 的 Skills。扫描范围：~/.claude/skills、~/.agents/skills。同步策略是 merge-only：目标应用已有同名 skill 时不会覆盖，关闭时只删除本工具创建的同步副本。
       </p>
 
       <div className="flex flex-wrap items-center gap-2">
         <Button onClick={() => void scanUnmanaged()} variant="outline" size="sm" disabled={isScanning}>
           <Search className="mr-2 h-4 w-4" />
           {isScanning ? '扫描中...' : '扫描应用 Skills'}
+        </Button>
+        <Button onClick={() => setManualImportOpen(true)} variant="outline" size="sm">
+          <Upload className="mr-2 h-4 w-4" />
+          手动导入 ZIP
         </Button>
         {saveStatus === 'success' && (
           <span className="animate-in fade-in text-xs text-muted-foreground">已保存</span>
@@ -101,7 +113,7 @@ export default function UnifiedSkillsPanel() {
 
         {!isLoading && skills.length === 0 && (
           <div className="rounded-lg border border-dashed border-border py-8 text-center text-sm text-muted-foreground">
-            还没有托管的 Skills。先扫描应用 Skills，再选择导入。
+            还没有托管的 Skills。可以扫描应用 Skills，也可以手动导入 ZIP。
           </div>
         )}
       </section>
@@ -138,6 +150,18 @@ export default function UnifiedSkillsPanel() {
           </div>
         )}
       </section>
+
+      <ManualSkillImportDialog
+        open={manualImportOpen}
+        onOpenChange={setManualImportOpen}
+        preview={zipPreview}
+        isPreviewing={isPreviewingZip}
+        isImporting={isImportingZip}
+        error={zipImportError}
+        onPreview={previewZipSkill}
+        onImport={importZipSkill}
+        onClear={clearZipPreview}
+      />
     </div>
   );
 }

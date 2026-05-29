@@ -8,6 +8,7 @@ type AuthScreenLayoutProps = {
   children: ReactNode;
   footerText: string;
   logo?: ReactNode;
+  headerAction?: ReactNode;
 };
 
 export default function AuthScreenLayout({
@@ -16,11 +17,18 @@ export default function AuthScreenLayout({
   children,
   footerText,
   logo,
+  headerAction,
 }: AuthScreenLayoutProps) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
         <div className="space-y-6 rounded-lg border border-border bg-card p-8 shadow-lg">
+          {headerAction && (
+            <div className="flex justify-end">
+              {headerAction}
+            </div>
+          )}
+
           <div className="text-center">
             <div className="mb-4 flex justify-center">
               {logo ?? (

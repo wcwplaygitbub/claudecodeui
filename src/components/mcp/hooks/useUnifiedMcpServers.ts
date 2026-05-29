@@ -15,8 +15,6 @@ import { createMcpPayloadFromForm, getErrorMessage } from '../utils/mcpFormattin
 const UNIFIED_MCP_DEFAULT_ENABLED: UnifiedMcpAppStates = {
   claude: true,
   codex: false,
-  gemini: false,
-  cursor: false,
 };
 
 const readJson = async <T,>(response: Response): Promise<T> => response.json() as Promise<T>;

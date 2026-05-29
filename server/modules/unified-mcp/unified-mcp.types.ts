@@ -1,8 +1,8 @@
 import type { McpTransport } from '@/shared/types.js';
 
-export type UnifiedMcpApp = 'claude' | 'codex' | 'gemini' | 'cursor';
+export type UnifiedMcpApp = 'claude' | 'codex';
 
-export const UNIFIED_MCP_APPS: UnifiedMcpApp[] = ['claude', 'codex', 'gemini', 'cursor'];
+export const UNIFIED_MCP_APPS: UnifiedMcpApp[] = ['claude', 'codex'];
 
 export type UnifiedMcpAppStates = Record<UnifiedMcpApp, boolean>;
 

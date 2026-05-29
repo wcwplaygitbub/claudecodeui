@@ -88,8 +88,6 @@ const sameConfig = (left: UnifiedMcpServerConfig, right: UnifiedMcpServerConfig)
 const emptyEnabled = (): UnifiedMcpAppStates => ({
   claude: false,
   codex: false,
-  gemini: false,
-  cursor: false,
 });
 
 export const unifiedMcpService = {

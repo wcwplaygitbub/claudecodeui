@@ -16,8 +16,6 @@ type McpServersProps = {
 const UNIFIED_MCP_APPS: Array<{ id: UnifiedMcpApp; label: string }> = [
   { id: 'claude', label: 'Claude' },
   { id: 'codex', label: 'Codex' },
-  { id: 'gemini', label: 'Gemini' },
-  { id: 'cursor', label: 'Cursor' },
 ];
 
 const getTransportIcon = (transport: string | undefined) => {
@@ -70,7 +68,7 @@ export default function McpServers({ currentProjects = [] }: McpServersProps) {
         <h3 className="text-lg font-medium text-foreground">{t('mcpServers.title')}</h3>
       </div>
       <p className="text-sm text-muted-foreground">
-        Unified MCP management follows cc-switch: define each server once and enable it for Claude, Codex, Gemini, or Cursor.
+        Unified MCP management follows cc-switch: define each server once and enable it for Claude or Codex.
       </p>
 
       <div className="space-y-2">

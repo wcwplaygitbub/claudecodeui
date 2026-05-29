@@ -16,9 +16,26 @@ const readEnabled = (value: unknown): UnifiedSkillAppStates => {
   return {
     claude: record.claude === true,
     codex: record.codex === true,
-    gemini: record.gemini === true,
-    cursor: record.cursor === true,
   };
+};
+
+export const parseSkillZipEnabledPayload = (value: unknown): UnifiedSkillAppStates => {
+  if (value === undefined || value === null || value === '') {
+    return readEnabled(undefined);
+  }
+
+  if (typeof value !== 'string') {
+    return readEnabled(value);
+  }
+
+  try {
+    return readEnabled(JSON.parse(value) as unknown);
+  } catch {
+    throw new AppError('enabled must be valid JSON.', {
+      code: 'INVALID_ENABLED_PAYLOAD',
+      statusCode: 400,
+    });
+  }
 };
 
 export const parseUnifiedSkillApp = (value: unknown): UnifiedSkillApp => {

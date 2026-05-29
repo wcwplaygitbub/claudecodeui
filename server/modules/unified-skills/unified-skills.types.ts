@@ -1,6 +1,6 @@
-export type UnifiedSkillApp = 'claude' | 'codex' | 'gemini' | 'cursor';
+export type UnifiedSkillApp = 'claude' | 'codex';
 
-export const UNIFIED_SKILL_APPS: UnifiedSkillApp[] = ['claude', 'codex', 'gemini', 'cursor'];
+export const UNIFIED_SKILL_APPS: UnifiedSkillApp[] = ['claude', 'codex'];
 
 export type UnifiedSkillAppStates = Record<UnifiedSkillApp, boolean>;
 
@@ -29,4 +29,30 @@ export type UnifiedSkillSyncRecord = {
   app: UnifiedSkillApp;
   targetPath: string;
   createdAt: string;
+};
+
+export type UnifiedSkillZipValidationIssue = {
+  code: string;
+  message: string;
+};
+
+export type UnifiedSkillZipPreview = {
+  valid: boolean;
+  directory: string;
+  id: string;
+  name: string;
+  description: string;
+  rootPrefix?: string;
+  warnings: UnifiedSkillZipValidationIssue[];
+  errors: UnifiedSkillZipValidationIssue[];
+  conflicts: {
+    managed: boolean;
+    apps: UnifiedSkillApp[];
+  };
+};
+
+export type ImportZipSkillInput = {
+  buffer: Buffer;
+  originalName: string;
+  enabled: UnifiedSkillAppStates;
 };

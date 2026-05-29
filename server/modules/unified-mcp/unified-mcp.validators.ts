@@ -27,8 +27,6 @@ const readEnabled = (value: unknown): UnifiedMcpAppStates => {
   return {
     claude: record.claude === true,
     codex: record.codex === true,
-    gemini: record.gemini === true,
-    cursor: record.cursor === true,
   };
 };
 

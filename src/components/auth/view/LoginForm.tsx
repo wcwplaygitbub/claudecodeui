@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import AuthErrorAlert from './AuthErrorAlert';
 import AuthInputField from './AuthInputField';
+import LanguageSelector from '../../../shared/view/ui/LanguageSelector';
 import AuthScreenLayout from './AuthScreenLayout';
 
 type LoginFormState = {
@@ -58,7 +59,8 @@ export default function LoginForm() {
     <AuthScreenLayout
       title={t('login.title')}
       description={t('login.description')}
-      footerText="Enter your credentials to access WebCli"
+      footerText={t('login.footer')}
+      headerAction={<LanguageSelector compact />}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <AuthInputField

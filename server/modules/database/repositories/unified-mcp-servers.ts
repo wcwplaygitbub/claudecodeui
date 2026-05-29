@@ -38,8 +38,6 @@ const mapRow = (row: UnifiedMcpServerRow): UnifiedMcpServer => ({
   enabled: {
     claude: row.enabled_claude === 1,
     codex: row.enabled_codex === 1,
-    gemini: row.enabled_gemini === 1,
-    cursor: row.enabled_cursor === 1,
   },
   createdAt: row.created_at,
   updatedAt: row.updated_at,
@@ -87,8 +85,8 @@ export const unifiedMcpServersDb = {
       JSON.stringify(input.tags ?? []),
       input.enabled.claude ? 1 : 0,
       input.enabled.codex ? 1 : 0,
-      input.enabled.gemini ? 1 : 0,
-      input.enabled.cursor ? 1 : 0,
+      0,
+      0,
     );
 
     const saved = unifiedMcpServersDb.get(input.id);

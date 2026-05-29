@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { authenticatedFetch } from '../../../utils/api';
-import type { ApiResponse, UnifiedSkill, UnifiedSkillApp, UnifiedSkillAppStates, UnmanagedSkill } from '../types';
+import type { ApiResponse, UnifiedSkill, UnifiedSkillApp, UnifiedSkillAppStates, UnifiedSkillZipPreview, UnmanagedSkill } from '../types';
 
 const readJson = async <T,>(response: Response): Promise<T> => response.json() as Promise<T>;
 
@@ -18,13 +18,21 @@ const getApiErrorMessage = (payload: unknown, fallback: string): string => {
   return fallback;
 };
 
+const getApiErrorPreview = (payload: unknown): UnifiedSkillZipPreview | null => {
+  if (!payload || typeof payload !== 'object') return null;
+  const error = (payload as Record<string, unknown>).error;
+  if (!error || typeof error !== 'object') return null;
+  const details = (error as Record<string, unknown>).details;
+  if (!details || typeof details !== 'object') return null;
+  const preview = (details as Record<string, unknown>).preview;
+  return preview && typeof preview === 'object' ? preview as UnifiedSkillZipPreview : null;
+};
+
 const getErrorMessage = (error: unknown): string => error instanceof Error ? error.message : String(error);
 
 const enabledFromFoundIn = (skill: UnmanagedSkill): UnifiedSkillAppStates => ({
   claude: skill.foundIn.includes('claude'),
   codex: skill.foundIn.includes('codex'),
-  gemini: skill.foundIn.includes('gemini'),
-  cursor: skill.foundIn.includes('cursor'),
 });
 
 export function useUnifiedSkills() {
@@ -32,6 +40,10 @@ export function useUnifiedSkills() {
   const [unmanagedSkills, setUnmanagedSkills] = useState<UnmanagedSkill[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
+  const [isPreviewingZip, setIsPreviewingZip] = useState(false);
+  const [isImportingZip, setIsImportingZip] = useState(false);
+  const [zipPreview, setZipPreview] = useState<UnifiedSkillZipPreview | null>(null);
+  const [zipImportError, setZipImportError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<'success' | 'error' | null>(null);
 
@@ -119,6 +131,68 @@ export function useUnifiedSkills() {
     setSaveStatus('success');
   }, [refreshSkills, scanUnmanaged]);
 
+  const clearZipPreview = useCallback(() => {
+    setZipPreview(null);
+    setZipImportError(null);
+  }, []);
+
+  const previewZipSkill = useCallback(async (file: File): Promise<UnifiedSkillZipPreview> => {
+    setIsPreviewingZip(true);
+    setZipImportError(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await authenticatedFetch('/api/unified-skills/import/zip/preview', {
+        method: 'POST',
+        body: formData,
+        headers: {},
+      });
+      const data = await readJson<ApiResponse<{ preview: UnifiedSkillZipPreview }>>(response);
+      if (!response.ok || !data.success) {
+        throw new Error(getApiErrorMessage(data, 'Failed to check ZIP'));
+      }
+      setZipPreview(data.data.preview);
+      return data.data.preview;
+    } catch (error) {
+      const message = getErrorMessage(error);
+      setZipImportError(message);
+      throw error;
+    } finally {
+      setIsPreviewingZip(false);
+    }
+  }, []);
+
+  const importZipSkill = useCallback(async (file: File, enabled: UnifiedSkillAppStates): Promise<void> => {
+    setIsImportingZip(true);
+    setZipImportError(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('enabled', JSON.stringify(enabled));
+      const response = await authenticatedFetch('/api/unified-skills/import/zip', {
+        method: 'POST',
+        body: formData,
+        headers: {},
+      });
+      const data = await readJson<ApiResponse<{ skill: UnifiedSkill; warnings: unknown[] }>>(response);
+      if (!response.ok || !data.success) {
+        const preview = getApiErrorPreview(data);
+        if (preview) setZipPreview(preview);
+        throw new Error(getApiErrorMessage(data, 'Failed to import ZIP'));
+      }
+      await refreshSkills();
+      setZipPreview(null);
+      setSaveStatus('success');
+    } catch (error) {
+      const message = getErrorMessage(error);
+      setZipImportError(message);
+      setSaveStatus('error');
+      throw error;
+    } finally {
+      setIsImportingZip(false);
+    }
+  }, [refreshSkills]);
+
   useEffect(() => {
     void refreshSkills();
   }, [refreshSkills]);
@@ -134,6 +208,10 @@ export function useUnifiedSkills() {
     unmanagedSkills,
     isLoading,
     isScanning,
+    isPreviewingZip,
+    isImportingZip,
+    zipPreview,
+    zipImportError,
     loadError,
     saveStatus,
     refreshSkills,
@@ -141,5 +219,8 @@ export function useUnifiedSkills() {
     importSkill,
     toggleApp,
     deleteSkill,
+    previewZipSkill,
+    importZipSkill,
+    clearZipPreview,
   };
 }

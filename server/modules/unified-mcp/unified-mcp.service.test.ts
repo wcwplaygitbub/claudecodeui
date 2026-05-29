@@ -57,8 +57,6 @@ test('unifiedMcpService stores one server and toggles provider configs through a
       enabled: {
         claude: true,
         codex: false,
-        gemini: false,
-        cursor: false,
       },
     });
 
@@ -97,8 +95,6 @@ test('unifiedMcpService removes old app config names when an enabled server is r
       enabled: {
         claude: true,
         codex: false,
-        gemini: false,
-        cursor: false,
       },
     });
 
@@ -114,8 +110,6 @@ test('unifiedMcpService removes old app config names when an enabled server is r
       enabled: {
         claude: true,
         codex: false,
-        gemini: false,
-        cursor: false,
       },
     });
 

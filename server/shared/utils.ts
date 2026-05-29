@@ -583,18 +583,25 @@ export async function findProviderSkillMarkdownFiles(
  * parent directory name is used as a stable fallback so providers can still
  * expose the skill. Missing descriptions are normalized to an empty string.
  */
-export async function readProviderSkillMarkdownDefinition(
-  skillPath: string,
-): Promise<{ name: string; description: string }> {
-  const content = await readFile(skillPath, 'utf8');
+export function readProviderSkillMarkdownDefinitionFromContent(
+  content: string,
+  fallbackName: string,
+): { name: string; description: string } {
   const parsed = parseFrontMatter(content);
   const data = readObjectRecord(parsed.data) ?? {};
-  const fallbackName = path.basename(path.dirname(skillPath));
 
   return {
     name: readOptionalString(data.name) ?? fallbackName,
     description: readOptionalString(data.description) ?? '',
   };
+}
+
+export async function readProviderSkillMarkdownDefinition(
+  skillPath: string,
+): Promise<{ name: string; description: string }> {
+  const content = await readFile(skillPath, 'utf8');
+  const fallbackName = path.basename(path.dirname(skillPath));
+  return readProviderSkillMarkdownDefinitionFromContent(content, fallbackName);
 }
 
 // ---------------------------

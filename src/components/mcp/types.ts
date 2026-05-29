@@ -75,7 +75,7 @@ export type GlobalMcpServerResult = {
   error?: string;
 };
 
-export type UnifiedMcpApp = 'claude' | 'codex' | 'gemini' | 'cursor';
+export type UnifiedMcpApp = 'claude' | 'codex';
 
 export type UnifiedMcpAppStates = Record<UnifiedMcpApp, boolean>;
 

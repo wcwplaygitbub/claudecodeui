@@ -1,4 +1,4 @@
-export type UnifiedSkillApp = 'claude' | 'codex' | 'gemini' | 'cursor';
+export type UnifiedSkillApp = 'claude' | 'codex';
 
 export type UnifiedSkillAppStates = Record<UnifiedSkillApp, boolean>;
 
@@ -19,6 +19,26 @@ export type UnmanagedSkill = {
   description: string;
   foundIn: UnifiedSkillApp[];
   path: string;
+};
+
+export type UnifiedSkillZipValidationIssue = {
+  code: string;
+  message: string;
+};
+
+export type UnifiedSkillZipPreview = {
+  valid: boolean;
+  directory: string;
+  id: string;
+  name: string;
+  description: string;
+  rootPrefix?: string;
+  warnings: UnifiedSkillZipValidationIssue[];
+  errors: UnifiedSkillZipValidationIssue[];
+  conflicts: {
+    managed: boolean;
+    apps: UnifiedSkillApp[];
+  };
 };
 
 export type ApiSuccessResponse<T> = {
